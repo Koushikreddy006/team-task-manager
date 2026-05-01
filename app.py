@@ -12,7 +12,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ---------------- INIT ----------------
 db.init_app(app)
 
-# ✅ Create DB (Railway safe)
 with app.app_context():
     db.create_all()
 
@@ -97,17 +96,14 @@ def create_project():
 
     name = request.form.get('name')
 
-    project = Project(
-        name=name,
-        created_by=current_user.id
-    )
+    project = Project(name=name, created_by=current_user.id)
 
     db.session.add(project)
     db.session.commit()
 
     return redirect(url_for('dashboard'))
 
-# ---------------- ADD TASK (FIXED) ----------------
+# ---------------- ADD TASK (FINAL FIXED) ----------------
 @app.route('/add_task', methods=['POST'])
 @login_required
 def add_task():
@@ -115,9 +111,16 @@ def add_task():
     if current_user.role == "Admin":
         title = request.form.get('title')
 
-        # ✅ FIX: convert to int
-        user_id = int(request.form.get('user_id'))
-        project_id = int(request.form.get('project_id'))
+        user_id_raw = request.form.get('user_id')
+        project_id_raw = request.form.get('project_id')
+
+        if not user_id_raw or not project_id_raw:
+            return "User or Project not selected"
+
+        user_id = int(user_id_raw)
+        project_id = int(project_id_raw)
+
+        print("Assigning task to user:", user_id)
 
         task = Task(
             title=title,
@@ -159,9 +162,7 @@ def complete_task(id):
 def delete_task(id):
     task = Task.query.get(id)
 
-    if task and (
-        task.user_id == current_user.id or current_user.role == "Admin"
-    ):
+    if task and (task.user_id == current_user.id or current_user.role == "Admin"):
         db.session.delete(task)
         db.session.commit()
 
