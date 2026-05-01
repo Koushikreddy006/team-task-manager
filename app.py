@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ---------------- INIT ----------------
 db.init_app(app)
 
-# ✅ IMPORTANT (Railway safe)
+# ✅ Create DB (Railway safe)
 with app.app_context():
     db.create_all()
 
@@ -107,16 +107,17 @@ def create_project():
 
     return redirect(url_for('dashboard'))
 
-# ---------------- ADD TASK (ASSIGN) ----------------
+# ---------------- ADD TASK (FIXED) ----------------
 @app.route('/add_task', methods=['POST'])
 @login_required
 def add_task():
 
-    # Admin assigns tasks
     if current_user.role == "Admin":
         title = request.form.get('title')
-        user_id = request.form.get('user_id')
-        project_id = request.form.get('project_id')
+
+        # ✅ FIX: convert to int
+        user_id = int(request.form.get('user_id'))
+        project_id = int(request.form.get('project_id'))
 
         task = Task(
             title=title,
@@ -125,7 +126,6 @@ def add_task():
             project_id=project_id
         )
 
-    # Member creates own task
     else:
         title = request.form.get('title')
 
