@@ -3,16 +3,15 @@ from models import db, User, Task
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
+
+# ---------------- CONFIG ----------------
 app.config['SECRET_KEY'] = 'secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# ---------------- INIT ----------------
 db.init_app(app)
 
-
-# ADD THIS BLOCK 👇
-with app.app_context():
-    db.create_all()
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
@@ -31,19 +30,26 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        existing_user = User.query.filter_by(email=request.form['email']).first()
-        
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        role = request.form.get('role')
+
+        # check if user exists
+        existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             return "User already exists!"
 
+        # create user
         user = User(
-            name=request.form['name'],
-            email=request.form['email'],
-            password=request.form['password'],
-            role=request.form['role']
+            name=name,
+            email=email,
+            password=password,
+            role=role
         )
         db.session.add(user)
         db.session.commit()
+
         return redirect(url_for('login'))
 
     return render_template('signup.html')
@@ -52,9 +58,12 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.query.filter_by(email=request.form['email']).first()
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-        if user and user.password == request.form['password']:
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.password == password:
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
@@ -121,4 +130,5 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    app.run(host='0.0.0.0', port=5000)
