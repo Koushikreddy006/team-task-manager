@@ -2,20 +2,25 @@
 
 ## 🔥 Features
 - User Signup & Login
-- Role-based access (Admin / Member)
 - Add tasks
 - Mark tasks as Done
 - Delete tasks
-- Dashboard with Bootstrap UI
+- Dashboard UI
 
 ## 🛠 Tech Stack
 - Python (Flask)
 - SQLite
 - HTML/CSS (Bootstrap)
-- Flask-Login
-- SQLAlchemy
 
 ## ▶️ Run Locally
-```bash
-pip install -r requirements.txt
-python app.py
+pip install -r requirements.txt  
+python app.py  
+
+## 🌐 Live App
+https://web-production-2ff3e4.up.railway.app
+
+## 📽 Demo Video
+(Paste your video link here)
+
+## 📂 GitHub Repo
+https://github.com/Koushikreddy006/team-task-manager
