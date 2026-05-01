@@ -1,26 +1,25 @@
-# Team Task Manager (Flask)
+# Team Task Manager (Full-Stack)
 
-## 🔥 Features
-- User Signup & Login
-- Add tasks
-- Mark tasks as Done
-- Delete tasks
-- Dashboard UI
-
-## 🛠 Tech Stack
-- Python (Flask)
-- SQLite
-- HTML/CSS (Bootstrap)
-
-## ▶️ Run Locally
-pip install -r requirements.txt  
-python app.py  
-
-## 🌐 Live App
+## Live App
 https://web-production-2ff3e4.up.railway.app
 
-## 📽 Demo Video
-(Paste your video link here)
-
-## 📂 GitHub Repo
+## GitHub Repo
 https://github.com/Koushikreddy006/team-task-manager
+
+## Features
+- User Authentication (Signup/Login)
+- Role-based access (Admin / Member)
+- Admin can create projects
+- Admin can assign tasks to users
+- Task status tracking (Pending / Done)
+- Dashboard with task view
+
+## Tech Stack
+- Flask (Backend)
+- SQLite (Database)
+- Flask-Login (Authentication)
+- Bootstrap (UI)
+- Railway (Deployment)
+
+## Demo Video
+(Attach your video link)
