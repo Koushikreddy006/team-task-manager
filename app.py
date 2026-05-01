@@ -125,7 +125,9 @@ def delete_task(id):
 def logout():
     logout_user()
     return redirect(url_for('login'))
-
+@app.before_first_request
+def create_tables():
+    db.create_all()
 # ---------------- RUN ----------------
 if __name__ == '__main__':
     with app.app_context():
