@@ -12,6 +12,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ---------------- INIT ----------------
 db.init_app(app)
 
+# ✅ CREATE DB AT STARTUP (WORKS IN RAILWAY)
+with app.app_context():
+    db.create_all()
+
 login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
@@ -125,12 +129,8 @@ def delete_task(id):
 def logout():
     logout_user()
     return redirect(url_for('login'))
-@app.before_first_request
-def create_tables():
-    db.create_all()
+
 # ---------------- RUN ----------------
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-
     app.run(host='0.0.0.0', port=5000)
+    
