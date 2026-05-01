@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from models import db, User, Task
+from models import db, User, Task, Project
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # ---------------- INIT ----------------
 db.init_app(app)
 
-# ✅ CREATE DB AT STARTUP (WORKS IN RAILWAY)
+# ✅ IMPORTANT (Railway safe)
 with app.app_context():
     db.create_all()
 
@@ -39,18 +39,10 @@ def signup():
         password = request.form.get('password')
         role = request.form.get('role')
 
-        # check if user exists
-        existing_user = User.query.filter_by(email=email).first()
-        if existing_user:
+        if User.query.filter_by(email=email).first():
             return "User already exists!"
 
-        # create user
-        user = User(
-            name=name,
-            email=email,
-            password=password,
-            role=role
-        )
+        user = User(name=name, email=email, password=password, role=role)
         db.session.add(user)
         db.session.commit()
 
@@ -79,23 +71,73 @@ def login():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', tasks=tasks)
 
-# ---------------- ADD TASK ----------------
+    if current_user.role == "Admin":
+        tasks = Task.query.all()
+        users = User.query.all()
+        projects = Project.query.all()
+    else:
+        tasks = Task.query.filter_by(user_id=current_user.id).all()
+        users = None
+        projects = Project.query.all()
+
+    return render_template(
+        'dashboard.html',
+        tasks=tasks,
+        users=users,
+        projects=projects
+    )
+
+# ---------------- CREATE PROJECT ----------------
+@app.route('/create_project', methods=['POST'])
+@login_required
+def create_project():
+    if current_user.role != "Admin":
+        return "Access denied"
+
+    name = request.form.get('name')
+
+    project = Project(
+        name=name,
+        created_by=current_user.id
+    )
+
+    db.session.add(project)
+    db.session.commit()
+
+    return redirect(url_for('dashboard'))
+
+# ---------------- ADD TASK (ASSIGN) ----------------
 @app.route('/add_task', methods=['POST'])
 @login_required
 def add_task():
-    title = request.form.get('title')
 
-    if title:
+    # Admin assigns tasks
+    if current_user.role == "Admin":
+        title = request.form.get('title')
+        user_id = request.form.get('user_id')
+        project_id = request.form.get('project_id')
+
         task = Task(
             title=title,
             status="Pending",
-            user_id=current_user.id
+            user_id=user_id,
+            project_id=project_id
         )
-        db.session.add(task)
-        db.session.commit()
+
+    # Member creates own task
+    else:
+        title = request.form.get('title')
+
+        task = Task(
+            title=title,
+            status="Pending",
+            user_id=current_user.id,
+            project_id=None
+        )
+
+    db.session.add(task)
+    db.session.commit()
 
     return redirect(url_for('dashboard'))
 
@@ -117,7 +159,9 @@ def complete_task(id):
 def delete_task(id):
     task = Task.query.get(id)
 
-    if task and task.user_id == current_user.id:
+    if task and (
+        task.user_id == current_user.id or current_user.role == "Admin"
+    ):
         db.session.delete(task)
         db.session.commit()
 
@@ -133,4 +177,3 @@ def logout():
 # ---------------- RUN ----------------
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-    
