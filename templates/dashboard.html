@@ -15,18 +15,18 @@
         <a href="/logout" class="btn btn-danger">Logout</a>
     </div>
 
-    <!-- CREATE PROJECT (ADMIN) -->
+    <!-- CREATE PROJECT (ADMIN ONLY) -->
     {% if current_user.role == "Admin" %}
     <div class="card mb-3 p-3">
         <h5>Create Project</h5>
         <form method="POST" action="/create_project">
             <input name="name" placeholder="Project name" class="form-control mb-2" required>
-            <button class="btn btn-primary">Create</button>
+            <button class="btn btn-primary">Create Project</button>
         </form>
     </div>
     {% endif %}
 
-    <!-- ADD TASK -->
+    <!-- ADD / ASSIGN TASK -->
     <div class="card mb-4 p-3">
         <h5>
             {% if current_user.role == "Admin" %}
@@ -38,17 +38,22 @@
 
         <form method="POST" action="/add_task">
 
+            <!-- TASK TITLE -->
             <input name="title" placeholder="Task title" class="form-control mb-2" required>
 
             {% if current_user.role == "Admin" %}
 
-            <select name="project_id" class="form-control mb-2">
+            <!-- PROJECT SELECT -->
+            <select name="project_id" class="form-control mb-2" required>
+                <option value="" disabled selected>Select Project</option>
                 {% for project in projects %}
                 <option value="{{ project.id }}">{{ project.name }}</option>
                 {% endfor %}
             </select>
 
-            <select name="user_id" class="form-control mb-2">
+            <!-- USER SELECT -->
+            <select name="user_id" class="form-control mb-2" required>
+                <option value="" disabled selected>Select User</option>
                 {% for user in users %}
                 <option value="{{ user.id }}">{{ user.name }}</option>
                 {% endfor %}
@@ -56,8 +61,8 @@
 
             {% endif %}
 
-            <button class="btn btn-success">
-                {% if current_user.role == "Admin" %}Assign{% else %}Add{% endif %}
+            <button class="btn btn-success w-100">
+                {% if current_user.role == "Admin" %}Assign Task{% else %}Add Task{% endif %}
             </button>
 
         </form>
@@ -76,14 +81,14 @@
                 <div>
                     <strong>{{ task.title }}</strong><br>
 
-                    <!-- PROJECT -->
+                    <!-- PROJECT NAME -->
                     {% for project in projects %}
                         {% if project.id == task.project_id %}
                         <small class="text-muted">Project: {{ project.name }}</small><br>
                         {% endif %}
                     {% endfor %}
 
-                    <!-- USER (ADMIN VIEW) -->
+                    <!-- ASSIGNED USER (ADMIN VIEW ONLY) -->
                     {% if current_user.role == "Admin" %}
                         {% for user in users %}
                             {% if user.id == task.user_id %}
@@ -100,6 +105,7 @@
                     {% endif %}
                 </div>
 
+                <!-- ACTION BUTTONS -->
                 <div>
                     {% if task.status != "Done" %}
                     <a href="/complete_task/{{ task.id }}" class="btn btn-success btn-sm">Done</a>
